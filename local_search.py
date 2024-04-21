@@ -38,3 +38,49 @@ def get_neighbor(state):
             n_state[add_index] = 1
 
     return tuple(n_state)  # Convert back to tuple before returning
+
+def simulated_annealing(initial_state, S, T, initial_temp=1000):
+    # Set the initial temperature
+    temp = initial_temp
+
+    # Set the initial state
+    current = initial_state
+
+    # Initialize iteration counter
+    iters = 0
+
+    # Main while loop
+    while temp >= 0:
+        # Update the temperature
+        temp *= 0.9999
+        
+        # Check if the temperature is lower than the threshold
+        if temp < 1e-14:
+            return current, iters
+        
+        # Check if the objective function evaluates to zero
+        if objective_f(current, S, T) == 0:
+            return current, iters
+        
+        # Generate a random successor of the current state
+        next = get_neighbor(current)
+        
+        # Compute deltaE
+        deltaE = objective_f(current, S, T) - objective_f(next, S, T)
+        
+        # If deltaE is positive, accept the new state
+        if deltaE > 0:
+            current = next
+        
+        # Else, decide whether to accept the new state with a probability
+        else:
+            u = np.random.uniform()
+            if u <= np.exp(deltaE / temp):
+                current = next
+        
+        # Increment the iteration counter
+        iters += 1
+    
+    # Return the current state and number of iterations
+    return current, iters
+
